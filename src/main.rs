@@ -1,5 +1,6 @@
 use std::os;
 use std::str::FromStr;
+use std::fmt;
 
 const NUM_OF_CURRENCIES: usize = 1;
 
@@ -12,6 +13,27 @@ enum Currency {
     USD,
 }
 
+
+#[derive(Debug)]
+enum Error {
+    InvalidValue,
+    InvalidCurrency,
+    ConnectionError,
+}
+
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let msg = match self {
+            &Error::InvalidValue => "Invalid value. Must be float number.",
+            &Error::InvalidCurrency => "Invalid currency.",
+            &Error::ConnectionError => "Connection error.",
+        };
+        fmt::Display::fmt(msg, f)
+    }
+}
+
+
 type Exchange = (f32, Currency);
 
 fn render(exs: &[Exchange]) -> String {
@@ -21,13 +43,13 @@ fn render(exs: &[Exchange]) -> String {
     connect(" ")
 }
 
-fn convert(strvalue: &str, currency: &str) -> Result<[Exchange; NUM_OF_CURRENCIES], &'static str> {
-    //Box::new([(5.1, Currency::UAH)])
+fn convert(strvalue: &str, currency: &str) -> Result<[Exchange; NUM_OF_CURRENCIES], Error> {
     match FromStr::from_str(strvalue) {
-        None => Err("Invalid value"),
+        None => Err(Error::InvalidValue),
         Some(value) => Ok([(value, Currency::UAH)])
     }
 }
+
 
 fn main() {
     match os::args().as_slice() {
